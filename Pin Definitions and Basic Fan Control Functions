@@ -38,9 +38,64 @@ void fanOff() {
 }
 
 
+
+
 void setup() {
   Serial.begin(9600);
   dcMotorSetup();
   fanOff();
   WifiSetup();
+}
+
+
+
+
+
+void loop() {
+
+  // עדכון הערך הקודם רק כאשר יש שינוי
+  if (btnValue != prevVal) {
+    prevVal = btnValue;
+
+    // בדיקת ערך הכפתור ובצעת הפעולה הרלוונטית
+  switch (btnValue) {
+    case 0:
+      fanOff();
+      break;
+    case 1:
+      if (prevVal > 3) {
+        fanOff(); // כיבוי קודם
+        delay(1000); // המתנה לעצירה מוחלטת
+      }
+      powerLow1();
+      break;
+    case 2:
+      if (prevVal > 3) {
+        fanOff(); // כיבוי קודם
+        delay(1000); // המתנה לעצירה מוחלטת
+      }
+      powerMedium2();
+      break;
+    case 3:
+      if (prevVal > 3) {
+        fanOff(); // כיבוי קודם
+        delay(1000); // המתנה לעצירה מוחלטת
+      }
+      powerHigh3();
+      break;
+     case 4:
+      if (prevVal < 4) {
+        fanOff(); // כיבוי קודם
+        delay(1000); // המתנה לעצירה מוחלטת
+      }
+      setOnBck();
+      break;
+    default:
+      fanOff();
+      break;
+    }
+  }
+
+wifi_loop();
+
 }
