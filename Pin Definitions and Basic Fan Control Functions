@@ -36,3 +36,11 @@ void fanOff() {
     digitalWrite(A1a, LOW);
     digitalWrite(A1b, LOW);
 }
+
+
+void setup() {
+  Serial.begin(9600);
+  dcMotorSetup();
+  fanOff();
+  WifiSetup();
+}
