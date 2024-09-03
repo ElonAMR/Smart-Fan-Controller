@@ -1,0 +1,38 @@
+//הגדרת פינים
+#define A1a D1
+#define A1b D2
+
+int btnValue=0;
+int prevVal;
+
+// מצב עבודה של הפינים
+void dcMotorSetup() {
+    pinMode(A1a, OUTPUT);
+    pinMode(A1b, OUTPUT);
+}
+// מהירות חלשה 1
+void powerLow1(){
+  analogWrite(A1a, 50); 
+  digitalWrite(A1b, LOW);
+}
+// מהירות בינונית 2
+void powerMedium2(){
+  analogWrite(A1a, 128); 
+  digitalWrite(A1b, LOW);
+}
+// מהירות חזקה 3
+void powerHigh3(){
+  analogWrite(A1a, 200); 
+  digitalWrite(A1b, LOW);
+}
+
+//פונקציית הפעלה אחורה
+void setOnBck() {
+	  digitalWrite(A1a, LOW);
+	  digitalWrite(A1b, HIGH);
+}
+//פונקציית כיבוי מאוורר
+void fanOff() {
+    digitalWrite(A1a, LOW);
+    digitalWrite(A1b, LOW);
+}
