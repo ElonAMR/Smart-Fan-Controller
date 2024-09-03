@@ -1,0 +1,108 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+IPAddress    apIP(55, 55, 55, 55); //מגדיר כתובת IP לשרת ארדואינו
+
+const char* ssid = "MyFan"; //שם הרשת שיוצג
+const char* password = "12345";// הסיסמה לרשת אם נרצה להשתמש בה
+
+ESP8266WebServer server(80); // יצירת שרת וקביעת פורט 80 לא מאובטח
+
+
+void WifiSetup(){
+
+  WiFi.mode(WIFI_AP_STA); // מגדיר שאני אהיה הראשי השרת
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));   // פה מגדיר איזה כתובות הוא יחלק למתחברים לרשת 
+  WiFi.softAP(ssid); // יצירת נקודה גישה , אם הייתי רוצה סיסמא הייתי מוסיף פסיק ואת הסיסמא
+
+  server.on("/", handleRoot); //פרמטר ראשון כתובת קצה של השרת, פרמטר שני פונקציה שמפעילה את הדף בגדול
+  // server.on("/GetValue",SendLdrValueAsJson); //פרמטר שני כתובת קצה של השרת, פרמטר שני פונקציה שמפעילה את הפונקציה שמחכה לקבל נתונים 
+  server.onNotFound(handleNotFound); // ברירת מחדל שיוצג כאשר יש ניסיון להעלות דף שלא קיים
+  server.begin(); // אתחול שרת 
+  Serial.println("HTTP server started");
+
+}
+
+void wifi_loop(){ 
+  server.handleClient();// שיאזין לפניות מהלקוח כל זמן מסויים
+  delay(10);
+}
+
+void handleRoot() {
+  if (server.hasArg("btn_pressed")) {
+    btnValue = server.arg("btn_pressed").toInt(); // אופציה שניה מכיוון שאני כבר מקבל מספר כמחרוזת אז אעשה לו המרה למספר
+  }
+
+  char html[2000] = "";
+
+  strcat(html, "<html>");
+  strcat(html, "<head>");
+  strcat(html, "<meta charset=\"UTF-8\">");
+  strcat(html, "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">");
+  strcat(html, "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+
+  strcat(html, "<title>הדלקה וכיבוי מאוורר</title>");
+
+  strcat(html, "<style>");
+  strcat(html, "body{direction: rtl; background-color: lightgrey; text-align: center}");
+  strcat(html, "h1,h2{text-decoration: underline;}");
+  strcat(html, "button{padding: 10px 20px; font-size: 15px; margin: 10px 0;}");
+  strcat(html, "</style>");
+
+  strcat(html, "</head>");
+
+
+  strcat(html, "<body>");
+  strcat(html, "<div class=\"centered\">");
+  strcat(html, "<h1>הדלקה וכיבוי מאוורר</h1>");
+
+  strcat(html, "<h2>הדלקה הפוכה</h2>");
+  strcat(html, "<form action='' method='get'>");
+  strcat(html, "<button name=\"btn_pressed\" value=\"4\">סיבוב לאחור</button>");
+  strcat(html, "</form>");
+
+  strcat(html, "<h2>הדלקת מאוורר</h2>");
+  strcat(html, "<form action='' method='get'>");
+  strcat(html, "<button name=\"btn_pressed\" value=\"1\"> עוצמה 1</button>");
+  strcat(html, "<button name=\"btn_pressed\" value=\"2\"> עוצמה 2</button>");
+  strcat(html, "<button name=\"btn_pressed\" value=\"3\"> עוצמה 3</button>");
+  strcat(html, "</form>");
+
+  strcat(html, "<h2>כיבוי מאוורר</h2>");
+  strcat(html, "<form action='' method='get'>");
+  strcat(html, "<button name=\"btn_pressed\" value=\"0\">כיבוי מאוורר</button>");
+  strcat(html, "</form>");
+
+  strcat(html, "</div>");
+
+   strcat(html, "</body>");
+   strcat(html, "</html>");
+
+  server.send(200, "text/html" , html);
+
+}
+
+void handleNotFound(){ // הפונקציה תציג הדפסה של שגיאה מתאימה במקרה ולא הגענו לדף 
+    
+    String message = "File Not Found \n \n";
+    message += "URI: ";
+
+    message += server.uri();
+
+    message += "\nMethod: ";
+
+    message += (server.method() == HTTP_GET) ? "GET" : "POST";
+
+    message += "\nArguments: ";
+
+    message += server.args();
+
+    message += "\n";
+
+    for (uint8_t i = 0; i < server.args(); i++) {
+
+        message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+
+    }
+    server.send(404, "text/plain", message);
+}
